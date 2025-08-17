@@ -1,6 +1,7 @@
 export interface Student {
   id: string;
   name: string;
+  username?: string;
   grade: number;
   email?: string;
   avatar?: string;
@@ -12,6 +13,8 @@ export interface Student {
   totalQuizzes: number;
   badges?: number;
   dayStreak?: number;
+  schoolName?: string;
+  school?: string;
 }
 
 export interface Subject {
@@ -64,9 +67,22 @@ export interface Quiz {
   score?: number;
 }
 
+export interface QuestionTemplate {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  difficulty: 'easy' | 'medium' | 'hard';
+  explanation: string;
+}
+
 export interface LeaderboardEntry {
   student: Student;
   position: number;
   xpPoints: number;
   recentActivity: string;
+  winrate?: number;
+  lokalStats?: {
+    wins: number;
+    losses: number;
+  };
 }

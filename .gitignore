@@ -1,1 +1,19 @@
 node_modules
+dist
+.venv
+*.log
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Exclude scraped/archived web content
+web/public/sources/
+public/sources/
+web/public/sites/
+public/sites/
+
+# Exclude build artifacts
+build/
+out/

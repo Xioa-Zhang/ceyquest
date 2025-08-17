@@ -2,182 +2,270 @@ import { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Trophy, Medal, Award, Star, TrendingUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Trophy, Medal, Award, Star, TrendingUp, Bookmark, Users, Clock, ChevronDown, BookOpen } from 'lucide-react';
+import logo from '@/assets/logo_svg.svg';
 import Layout from '@/components/layout/Layout';
 import { LeaderboardEntry, Student } from '@/types';
+import LeaderboardUnlock from '@/components/LeaderboardUnlock';
 
 const Leaderboard = () => {
   const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [selectedGrade, setSelectedGrade] = useState<number>(6);
+  const [sortBy, setSortBy] = useState<'rank' | 'winrate' | 'score'>('rank');
+  const [timeFilter, setTimeFilter] = useState<'24h' | '7D' | '30D' | 'seasonal'>('24h');
+  const [showMyPlace, setShowMyPlace] = useState(false);
+  const [lessonsRequired, setLessonsRequired] = useState(7);
 
   useEffect(() => {
-    document.title = '-leaderboard';
+    document.title = 'Leaderboard - CeyQuest';
   }, []);
 
   useEffect(() => {
     const savedStudent = localStorage.getItem('ceyquest-student');
     let leaderboardData: LeaderboardEntry[] = [];
     let grade = 6;
+    
     if (savedStudent) {
       const studentData = JSON.parse(savedStudent);
       grade = parseInt(studentData.grade) || 6;
       setCurrentStudent({
         ...studentData,
-        id: '1',
-        xpPoints: 5777,
+        id: 'current-user',
+        xpPoints: 6500, // Higher XP to be 1st place
         rank: 1,
-        name: 'Anoof MA',
-        dayStreak: 20,
-        grade: 6,
+        name: studentData.name || studentData.fullName || 'Anoof MA',
+        dayStreak: 25,
+        grade: grade,
+        photo: studentData.photo || studentData.profilePicture || null,
       });
       setSelectedGrade(grade);
-      // Set Anoof MA as top rank
+    }
+
+    // Mock data with gaming-style stats
       leaderboardData = [
         {
-          position: 1,
+        position: 2,
           xpPoints: 5777,
-          student: {
-            id: '1',
-            name: 'Anoof MA',
-            grade: 6,
-            xpPoints: 5777,
-            rank: 1,
-            subjects: [],
-            completedQuizzes: 12,
-            totalQuizzes: 50,
-            dayStreak: 20,
-          },
-          recentActivity: 'Completed Quiz: Science',
-        },
-        {
-          student: {
-            id: '2',
-            name: 'Kavitha Fernando',
-            grade,
-            xpPoints: 2720,
-            rank: 2,
-            subjects: [],
-            completedQuizzes: 42,
-            totalQuizzes: 50
-          },
-          position: 2,
-          xpPoints: 2720,
-          recentActivity: 'Mastered Science - Atoms & Molecules'
-        },
-        {
-          student: {
-            id: '3',
-            name: 'Ravindu Silva',
-            grade,
-            xpPoints: 2650,
-            rank: 3,
-            subjects: [],
-            completedQuizzes: 40,
-            totalQuizzes: 50
-          },
-          position: 3,
-          xpPoints: 2650,
-          recentActivity: 'Perfect score in English Literature'
-        },
-        // Add more mock students
-        ...Array.from({ length: 12 }, (_, i) => ({
-          student: {
-            id: `${i + 4}`,
-            name: `Student ${i + 4}`,
-            grade,
-            xpPoints: 2600 - (i * 50),
-            rank: i + 4,
-            subjects: [],
-            completedQuizzes: 35 - i,
-            totalQuizzes: 50
-          },
-          position: i + 4,
-          xpPoints: 2600 - (i * 50),
-          recentActivity: 'Recent activity...'
-        }))
-      ];
-    }
-    setLeaderboard(leaderboardData);
-  }, [selectedGrade]);
-
-  const generateMockLeaderboard = (grade: number) => {
-    const mockStudents: LeaderboardEntry[] = [
-      {
-        student: {
+                  student: {
           id: '1',
           name: 'Sahan Perera',
-          grade,
-          xpPoints: 2850,
-          rank: 1,
-          subjects: [],
-          completedQuizzes: 45,
-          totalQuizzes: 50
-        },
-        position: 1,
-        xpPoints: 2850,
-        recentActivity: 'Completed Mathematics Quiz - Chapter 5'
-      },
-      {
-        student: {
-          id: '2',
-          name: 'Kavitha Fernando',
-          grade,
-          xpPoints: 2720,
+          grade: 6,
+          xpPoints: 5777,
           rank: 2,
           subjects: [],
           completedQuizzes: 42,
-          totalQuizzes: 50
+          totalQuizzes: 50,
+          dayStreak: 20,
+          photo: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=150&h=150&fit=crop&crop=face',
+          schoolName: 'Royal College Colombo',
         },
-        position: 2,
-        xpPoints: 2720,
-        recentActivity: 'Mastered Science - Atoms & Molecules'
-      },
-      {
-        student: {
+          recentActivity: 'Completed Quiz: Science',
+        winrate: 64,
+        lokalStats: { wins: 42, losses: 21 }
+        },
+        {
+                  student: {
+          id: '2',
+          name: 'Kavitha Fernando',
+          grade,
+          xpPoints: 5200,
+          rank: 3,
+          subjects: [],
+          completedQuizzes: 38,
+          totalQuizzes: 50,
+          photo: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+          schoolName: 'Ananda College',
+        },
+        position: 3,
+        xpPoints: 5200,
+        recentActivity: 'Mastered Science - Atoms & Molecules',
+        winrate: 58,
+        lokalStats: { wins: 38, losses: 25 }
+        },
+        {
+                  student: {
           id: '3',
           name: 'Ravindu Silva',
           grade,
-          xpPoints: 2650,
-          rank: 3,
+          xpPoints: 4850,
+          rank: 4,
           subjects: [],
-          completedQuizzes: 40,
-          totalQuizzes: 50
+          completedQuizzes: 35,
+          totalQuizzes: 50,
+          photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+          schoolName: 'St. Thomas\' College',
         },
-        position: 3,
-        xpPoints: 2650,
-        recentActivity: 'Perfect score in English Literature'
+        position: 4,
+        xpPoints: 4850,
+        recentActivity: 'Perfect score in English Literature',
+        winrate: 52,
+        lokalStats: { wins: 35, losses: 28 }
       },
-      // Add more mock students
-      ...Array.from({ length: 12 }, (_, i) => ({
+      {
         student: {
-          id: `${i + 4}`,
-          name: `Student ${i + 4}`,
+          id: '4',
+          name: 'Nethmi Jayasuriya',
           grade,
-          xpPoints: 2600 - (i * 50),
-          rank: i + 4,
+          xpPoints: 4600,
+          rank: 5,
           subjects: [],
-          completedQuizzes: 35 - i,
-          totalQuizzes: 50
+          completedQuizzes: 32,
+          totalQuizzes: 50,
+          photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+          schoolName: 'Visakha Vidyalaya',
         },
-        position: i + 4,
-        xpPoints: 2600 - (i * 50),
-        recentActivity: 'Recent activity...'
-      }))
+        position: 4,
+        xpPoints: 4600,
+        recentActivity: 'Completed Mathematics Quiz',
+        winrate: 49,
+        lokalStats: { wins: 32, losses: 30 }
+      },
+      {
+                  student: {
+          id: '5',
+          name: 'Dilshan Mendis',
+          grade,
+          xpPoints: 4350,
+          rank: 6,
+          subjects: [],
+          completedQuizzes: 30,
+          totalQuizzes: 50,
+          photo: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=150&h=150&fit=crop&crop=face',
+          schoolName: 'D.S. Senanayake College',
+        },
+        position: 5,
+        xpPoints: 4350,
+        recentActivity: 'Mastered History Chapter 3',
+        winrate: 45,
+        lokalStats: { wins: 30, losses: 32 }
+      },
+      {
+        student: {
+          id: '6',
+          name: 'Tharushi Bandara',
+          grade,
+          xpPoints: 4100,
+          rank: 7,
+          subjects: [],
+          completedQuizzes: 28,
+          totalQuizzes: 50,
+          photo: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+          schoolName: 'Musaeus College',
+        },
+        position: 6,
+        xpPoints: 4100,
+        recentActivity: 'Completed ICT Quiz',
+        winrate: 42,
+        lokalStats: { wins: 28, losses: 35 }
+      },
+      {
+        student: {
+          id: '7',
+          name: 'Amaara Wijesekara',
+          grade,
+          xpPoints: 3850,
+          rank: 8,
+          subjects: [],
+          completedQuizzes: 26,
+          totalQuizzes: 50,
+          photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+          schoolName: 'Bishop\'s College',
+        },
+        position: 7,
+        xpPoints: 3850,
+        recentActivity: 'Perfect score in Geography',
+        winrate: 39,
+        lokalStats: { wins: 26, losses: 38 }
+      },
+      {
+        student: {
+          id: '8',
+          name: 'Yasiru Rathnayake',
+          grade,
+          xpPoints: 3600,
+          rank: 9,
+          subjects: [],
+          completedQuizzes: 24,
+          totalQuizzes: 50,
+          photo: 'https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=150&h=150&fit=crop&crop=face',
+          schoolName: 'Nalanda College',
+        },
+        position: 8,
+        xpPoints: 3600,
+        recentActivity: 'Completed Art Quiz',
+        winrate: 36,
+        lokalStats: { wins: 24, losses: 40 }
+      },
+      {
+        student: {
+          id: '9',
+          name: 'Dilini Gunasekara',
+          grade,
+          xpPoints: 3350,
+          rank: 10,
+          subjects: [],
+          completedQuizzes: 22,
+          totalQuizzes: 50,
+          photo: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+          schoolName: 'Ladies\' College',
+        },
+        position: 9,
+        xpPoints: 3350,
+        recentActivity: 'Mastered Commerce',
+        winrate: 34,
+        lokalStats: { wins: 22, losses: 42 }
+      },
+      {
+        student: {
+          id: '10',
+          name: 'Sachini Perera',
+          grade,
+          xpPoints: 3100,
+          rank: 11,
+          subjects: [],
+          completedQuizzes: 20,
+          totalQuizzes: 50,
+          photo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face',
+          schoolName: 'Holy Family Convent',
+        },
+        position: 10,
+        xpPoints: 3100,
+        recentActivity: 'Completed Religion Quiz',
+        winrate: 32,
+        lokalStats: { wins: 20, losses: 44 }
+      }
     ];
 
-    // If current student exists, insert them at position 15
+    // Add current user as 1st place
     if (currentStudent) {
-      mockStudents.push({
+      leaderboardData.unshift({
         student: currentStudent,
-        position: 15,
+        position: 1,
         xpPoints: currentStudent.xpPoints,
-        recentActivity: 'Completed Quiz - Chapter 3'
+        recentActivity: 'Your recent activity',
+        winrate: 85, // High winrate for current user
+        lokalStats: { wins: Math.floor(currentStudent.xpPoints / 100), losses: Math.floor(currentStudent.xpPoints / 200) }
       });
     }
 
-    setLeaderboard(mockStudents);
-  };
+    setLeaderboard(leaderboardData);
+  }, [selectedGrade]);
+
+  // Sort leaderboard based on selected criteria
+  const sortedLeaderboard = [...leaderboard].sort((a, b) => {
+    switch (sortBy) {
+      case 'rank':
+        return a.position - b.position;
+      case 'winrate':
+        return (b.winrate || 0) - (a.winrate || 0);
+      case 'score':
+        return b.xpPoints - a.xpPoints;
+      default:
+        return a.position - b.position;
+    }
+  });
 
   const getRankIcon = (position: number) => {
     switch (position) {
@@ -192,251 +280,328 @@ const Leaderboard = () => {
     }
   };
 
-  const getRankBadgeVariant = (position: number) => {
-    if (position <= 3) return "default";
-    if (position <= 10) return "secondary";
-    return "outline";
+  const handleStartLesson = () => {
+    // Navigate to the Learn page or start a lesson
+    window.location.href = '/learn';
   };
 
-  // Mock stats for header
-  const totalRegistered = 1277;
-  const totalParticipated = 255;
+  // Check if student can access leaderboard
+  const canAccessLeaderboard = currentStudent && (currentStudent.completedQuizzes || 0) >= lessonsRequired;
+
+  const getRankBadge = (rank: number) => {
+    if (rank <= 3) return { name: 'Challenger', color: 'text-yellow-500', bgColor: 'bg-yellow-500/20' };
+    if (rank <= 10) return { name: 'Grandmaster', color: 'text-purple-500', bgColor: 'bg-purple-500/20' };
+    if (rank <= 20) return { name: 'Master', color: 'text-red-500', bgColor: 'bg-red-500/20' };
+    return { name: 'Gold', color: 'text-yellow-400', bgColor: 'bg-yellow-400/20' };
+  };
+
+  const getTrophyIcon = (position: number) => {
+    switch (position) {
+      case 1:
+        return <Trophy className="h-12 w-12 text-yellow-500" fill="#facc15" />;
+      case 2:
+        return <Trophy className="h-12 w-12 text-gray-400" fill="#d1d5db" />;
+      case 3:
+        return <Trophy className="h-12 w-12 text-orange-500" fill="#fb923c" />;
+      default:
+        return null;
+    }
+  };
+
+  // Show unlock screen if student hasn't completed enough lessons
+  if (!canAccessLeaderboard) {
+    return (
+      <Layout>
+        <LeaderboardUnlock 
+          currentStudent={currentStudent} 
+          onStartLesson={handleStartLesson} 
+        />
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
-      <div className="space-y-8 px-[30px]">
-        {/* Header */}
-        <div className="flex items-center mb-4">
-          <span className="block w-8 h-1 bg-white mr-4 rounded" />
-          <h1 className="font-bold text-white" style={{ fontSize: '18px', fontFamily: 'Inter, sans-serif' }}>Leaderboard</h1>
-        </div>
-        {/* Stats Row */}
-        <div className="w-full flex justify-center">
-          <div className="w-full md:w-[90%] mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4 items-center">
-              <Card className="bg-[#23272f] rounded-xl p-6 flex items-center gap-4 shadow-md w-[90%] mx-auto">
-                <div className="bg-green-500/20 p-3 rounded-full">
-                  <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2h5m6 0v-6m0 0V4m0 10a4 4 0 01-4-4V4a4 4 0 018 0v6a4 4 0 01-4 4z" /></svg>
-                </div>
+      <div className="min-h-screen bg-gray-900">
+        {/* Header Banner */}
+        <div className="relative bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 p-8">
+          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="relative z-10 max-w-7xl mx-auto">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4">
+                  <img src={logo} alt="CeyQuest Logo" className="w-16 h-16" />
                 <div>
-                  <div className="text-2xl font-bold text-white">{totalRegistered}</div>
-                  <div className="text-sm text-gray-400">Total Registered</div>
-                </div>
-              </Card>
-              {currentStudent && (
-                <Card className="bg-white/24 text-white shadow-glow w-[135%] max-w-full mx-auto h-fit flex flex-col justify-center">
-                  <CardContent className="p-3 flex flex-col justify-center">
-                    <div className="flex items-center justify-between gap-6">
-                      <div className="flex items-center gap-3 bg-white/10 rounded-xl px-3 py-2">
-                        <Avatar className="h-16 w-16 border-2 border-white">
-                          {currentStudent.photo ? (
-                            <img src={currentStudent.photo} alt={currentStudent.name} className="w-full h-full object-cover rounded-full" />
-                          ) : (
-                            <AvatarFallback className="bg-white text-primary text-lg font-bold">
-                              {currentStudent.name.split(' ').map(n => n[0]).join('')}
-                            </AvatarFallback>
-                          )}
-                        </Avatar>
-                        <div>
-                          <h3 className="text-xl font-bold">{currentStudent.name}</h3>
-                          <p className="text-white/80">Your Current Position</p>
+                    <h1 className="text-3xl font-bold text-white mb-2">CeyQuest Leaderboard</h1>
+                    <p className="text-gray-300">The ultimate learning platform for Sri Lankan students. Track your progress and compete with peers.</p>
+                    
+                    {/* Progress Indicator */}
+                    {currentStudent && (
+                      <div className="mt-4 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-teal-200 text-sm font-medium">
+                            Leaderboard Access Progress
+                          </span>
+                          <span className="text-white text-sm font-medium">
+                            {Math.min(currentStudent.completedQuizzes || 0, lessonsRequired)}/{lessonsRequired} lessons
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-700 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-teal-400 to-blue-500 h-2 rounded-full transition-all duration-500"
+                            style={{ 
+                              width: `${Math.min(((currentStudent.completedQuizzes || 0) / lessonsRequired) * 100, 100)}%` 
+                            }}
+                          />
                         </div>
                       </div>
-                      <div className="text-center">
-                        <div className="text-3xl font-bold">#{currentStudent.rank}</div>
-                        <div className="flex items-center gap-1 text-white/80">
-                          <Star className="h-4 w-4" />
-                          {currentStudent.xpPoints} XP
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-              <Card className="bg-[#23272f] rounded-xl p-6 flex items-center gap-4 shadow-md w-[90%] mx-auto">
-                <div className="bg-blue-500/20 p-3 rounded-full">
-                  <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2h5m6 0v-6m0 0V4m0 10a4 4 0 01-4-4V4a4 4 0 018 0v6a4 4 0 01-4 4z" /></svg>
+                    )}
                   </div>
-                <div>
-                  <div className="text-2xl font-bold text-white">{totalParticipated}</div>
-                  <div className="text-sm text-gray-400">Total Participated</div>
                 </div>
-              </Card>
+              </div>
+              <div className="flex gap-2">
+                {currentStudent && (currentStudent.completedQuizzes || 0) < lessonsRequired && (
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    className="border-teal-500 text-teal-400 hover:bg-teal-500 hover:text-white"
+                    onClick={handleStartLesson}
+                  >
+                    <BookOpen className="w-4 h-4 mr-2" />
+                    Complete {lessonsRequired - (currentStudent.completedQuizzes || 0)} more lessons
+                  </Button>
+                )}
+                <Button size="sm" className="bg-ceyquest-purple hover:bg-ceyquest-purple-dark text-white">
+                  Invite Friends
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-        {/* Top 3 Podium Cards */}
-        <div className="w-full flex justify-center">
-          <div className="w-full md:w-[80%] mx-auto">
-            <div className="flex flex-col md:flex-row gap-6 mb-8">
-              {leaderboard.slice(0, 3).map((entry, index) => (
-                <Card
-                  key={entry.student.id}
-                  className={`shadow-lg relative bg-[#23272f] ${
-                    index === 0 ? 'md:w-[50%] flex flex-row items-center justify-center' : 'rounded-2xl md:w-[25%] flex flex-col items-center p-6'
-                  }`}
-                >
-                  {index === 0 ? (
-                    <>
-                      <div className="flex-shrink-0 w-1/2 max-w-[220px] min-w-[120px] aspect-square overflow-hidden rounded-2xl">
-                        {entry.student.photo ? (
-                          <img src={entry.student.photo} alt={entry.student.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-white text-primary text-4xl font-bold">
-                            {entry.student.name.split(' ').map(n => n[0]).join('')}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 pl-12 flex flex-col justify-center items-center text-center">
-                        <h3 className="font-bold text-2xl text-white mb-2">{entry.student.name}</h3>
-                        <div className="flex flex-col gap-1 mb-2">
-                          <span className="text-xs text-gray-400 font-semibold">Quizzes</span>
-                          <div className="flex gap-4 items-center">
-                            <span className="text-white text-base font-bold">{entry.student.completedQuizzes ?? 0}</span>
-                            <span className="bg-purple-500/20 text-purple-400 px-2 py-1 rounded-full text-xs flex items-center gap-1">
-                              <span role="img" aria-label="badge">🏅</span> {entry.student.badges ?? 0} Badges
-                            </span>
-                            <span className="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full text-xs flex items-center gap-1">
-                              <span role="img" aria-label="rank">#</span> {entry.student.rank}
-                            </span>
+
+        {/* Filter Bar */}
+        <div className="bg-gray-800 border-b border-gray-700">
+          <div className="max-w-7xl mx-auto px-8 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                                <div className="flex gap-1 bg-gray-700 rounded-lg p-1">
+                  {(['rank', 'winrate', 'score'] as const).map((sort) => (
+                    <Button
+                      key={sort}
+                      variant={sortBy === sort ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setSortBy(sort)}
+                      className={sortBy === sort ? 'bg-ceyquest-purple hover:bg-ceyquest-purple-dark' : 'text-gray-300 hover:text-white'}
+                    >
+                      {sort.charAt(0).toUpperCase() + sort.slice(1)}
+                    </Button>
+                  ))}
+                </div>
+                <div className="flex gap-1">
+                  {(['24h', '7D', '30D', 'seasonal'] as const).map((time) => (
+                    <Button
+                      key={time}
+                      variant={timeFilter === time ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setTimeFilter(time)}
+                      className={timeFilter === time ? 'bg-ceyquest-purple hover:bg-ceyquest-purple-dark' : 'text-gray-300 hover:text-white'}
+                    >
+                      {time}
+                    </Button>
+                  ))}
+                  <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">
+                    Queue <ChevronDown className="w-4 h-4 ml-1" />
+                  </Button>
                           </div>
                         </div>
-                        <div className="flex gap-3 items-center">
-                          <span className="bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full text-xs flex items-center gap-1">
-                            <span role="img" aria-label="fire">🔥</span> day streaks
-                          </span>
-                          <span className="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-xs flex items-center gap-1">
-                            <span role="img" aria-label="gem">💎</span> {entry.xpPoints} XP
-                          </span>
+              <Button 
+                variant={showMyPlace ? "default" : "outline"}
+                size="sm" 
+                className={showMyPlace ? "bg-ceyquest-purple hover:bg-ceyquest-purple-dark text-white" : "border-gray-600 text-white hover:bg-gray-700"}
+                onClick={() => {
+                  setShowMyPlace(!showMyPlace);
+                  // Scroll to current user's position in the table
+                  const currentUserRow = document.getElementById('current-user-row');
+                  if (currentUserRow) {
+                    currentUserRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                }}
+              >
+                {showMyPlace ? 'Hide my place' : 'Show my place'}
+              </Button>
+            </div>
                         </div>
                       </div>
-                    </>
-                  ) : (
-                    <>
-                      <Avatar className="h-20 w-20 border-4 border-white mb-3">
-                        {entry.student.photo ? (
-                          <img src={entry.student.photo} alt={entry.student.name} className="w-full h-full object-cover rounded-full" />
+
+        <div className="max-w-7xl mx-auto px-8 py-8">
+          {/* Current User Position */}
+          {currentStudent && (
+            <div className="mb-8">
+              <Card className="bg-ceyquest-purple/10 border-ceyquest-purple/20 text-white">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="h-20 w-20 border-2 border-ceyquest-purple">
+                        {currentStudent.photo ? (
+                          <AvatarImage src={currentStudent.photo} alt={currentStudent.name} />
                         ) : (
-                          <AvatarFallback className="bg-white text-primary text-2xl font-bold">
-                            {entry.student.name.split(' ').map(n => n[0]).join('')}
+                          <AvatarFallback className="bg-ceyquest-purple text-white text-2xl font-bold">
+                            {currentStudent.name.split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>
                         )}
                       </Avatar>
-                      <h3 className="font-bold text-xl text-white mb-2">{entry.student.name}</h3>
-                      <div className="flex flex-col gap-1 mb-2">
-                        <span className="text-xs text-gray-400 font-semibold">Quizzes</span>
-                        <div className="flex gap-4 items-center">
-                          <span className="text-white text-base font-bold">{entry.student.completedQuizzes ?? 0}</span>
-                          <span className="bg-purple-500/20 text-purple-400 px-2 py-1 rounded-full text-xs flex items-center gap-1">
-                            <span role="img" aria-label="badge">🏅</span> {entry.student.badges ?? 0} Badges
-                          </span>
-                          <span className="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full text-xs flex items-center gap-1">
-                            <span role="img" aria-label="rank">#</span> {entry.student.rank}
-                          </span>
+                      <div>
+                        <h3 className="text-2xl font-bold text-white mb-2">Your Position</h3>
+                        <p className="text-gray-300 mb-1">Grade {currentStudent.grade} • {currentStudent.name}</p>
+                        <div className="flex items-center gap-4">
+                          <Badge className="bg-ceyquest-purple text-white border-0">
+                            #{currentStudent.rank}
+                          </Badge>
+                          <span className="text-ceyquest-purple font-bold">{currentStudent.xpPoints} XP</span>
+                          <span className="text-gray-400">Day Streak: {currentStudent.dayStreak || 0}</span>
                         </div>
                       </div>
-                      <div className="flex gap-3 items-center">
-                        <span className="bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full text-xs flex items-center gap-1">
-                          <span role="img" aria-label="fire">🔥</span> day streaks
-                        </span>
-                        <span className="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-xs flex items-center gap-1">
-                          <span role="img" aria-label="gem">💎</span> {entry.xpPoints} XP
-                        </span>
-                      </div>
-                    </>
-                  )}
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
-        {/* Student Cards Grid (left of global ranking, under podium) */}
-        <div className="w-full flex flex-col md:flex-row gap-8">
-          <div className="flex-1">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {leaderboard.filter(entry => entry.student.grade >= 6 && entry.student.grade <= 11).map((entry) => {
-                const completion = entry.student.totalQuizzes ? Math.round((entry.student.completedQuizzes / entry.student.totalQuizzes) * 100) : 0;
-                return (
-                  <div key={entry.student.id} className="bg-[#23272f] rounded-2xl shadow-lg p-0 flex flex-col items-stretch justify-between min-h-[220px] text-white overflow-hidden">
-                    <div className="w-full aspect-square flex-shrink-0">
-                      {entry.student.photo ? (
-                        <img src={entry.student.photo} alt={entry.student.name} className="w-full h-full object-cover" style={{ borderRadius: 0 }} />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-200 text-primary text-4xl font-bold" style={{ borderRadius: 0 }}>
-                          {entry.student.name.split(' ').map(n => n[0]).join('')}
-                        </div>
-                      )}
                     </div>
-                    <div className="flex flex-row items-center justify-center gap-2 mt-auto pt-4 border-t border-white/10">
-                      <div className="font-bold text-lg text-white">{entry.student.name}</div>
-                      <div className="text-xs text-gray-300">Grade {entry.student.grade}</div>
-                    </div>
-                    <div className="flex w-full justify-between items-center mt-2 gap-2 px-4 pb-4">
-                      <span className="inline-flex items-center gap-1 bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-xs font-bold">
-                        <span role="img" aria-label="gem">💎</span> {entry.student.xpPoints} XP
-                      </span>
-                      <span className="inline-flex items-center gap-1 bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-bold">
-                        <span role="img" aria-label="quiz">📝</span> {entry.student.completedQuizzes} Quizzes
-                      </span>
-                      <span className="inline-flex items-center gap-1 bg-green-500/20 text-green-300 px-3 py-1 rounded-full text-xs font-bold">
-                        <span role="img" aria-label="completion">✔️</span> {completion}%
-                      </span>
+                    <div className="text-right">
+                      <div className="text-4xl font-bold text-ceyquest-purple mb-2">#{currentStudent.rank}</div>
+                      <p className="text-gray-400">Your Rank</p>
                     </div>
                   </div>
-                );
-              })}
+                </CardContent>
+              </Card>
             </div>
-          </div>
-          {/* Global Ranking List (right) */}
-          <div className="w-full md:w-[30%] mx-auto">
-            <h2 className="text-2xl font-bold text-white mb-4">Global Ranking</h2>
-            <div className="flex flex-col gap-6">
-              {leaderboard.map((entry, idx) => (
-                <div
-                  key={entry.student.id}
-                  className={`flex items-center justify-between px-6 py-4 rounded-full shadow-lg transition-all duration-200 bg-white/20 backdrop-blur
-                    ${idx === 0 ? 'border-2 border-purple-500'
-                      : idx === 1 ? 'border-2 border-green-500'
-                      : idx === 2 ? 'border-2 border-blue-500'
-                      : 'border border-[#23272f]/40'}
-                  `}
-                >
-                  <div className="flex items-center gap-4">
-                    {entry.position > 3 && (
-                      <span className="font-bold text-gray-400 text-lg">#{entry.position}</span>
-                    )}
-                    {idx === 0 && (
-                      <span className="text-yellow-400"><Trophy className="w-7 h-7" fill="#facc15" /></span>
-                    )}
-                    {idx === 1 && (
-                      <span className="text-gray-400"><Trophy className="w-7 h-7" fill="#d1d5db" /></span>
-                    )}
-                    {idx === 2 && (
-                      <span className="text-orange-400"><Trophy className="w-7 h-7" fill="#fb923c" /></span>
-                    )}
-                    <Avatar className="h-14 w-14">
+          )}
+
+          {/* Top 3 Players */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {sortedLeaderboard.slice(0, 3).map((entry, index) => (
+              <Card key={entry.student.id} className="bg-gray-800 border-gray-700 text-white">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                                      <div className="flex items-center gap-3">
+                    <Avatar className="h-16 w-16 border-2 border-gray-600">
                       {entry.student.photo ? (
-                        <img src={entry.student.photo} alt={entry.student.name} className="w-full h-full object-cover rounded-full" />
+                        <AvatarImage src={entry.student.photo} alt={entry.student.name} />
                       ) : (
-                        <AvatarFallback className="bg-white text-primary text-xl font-bold">
+                        <AvatarFallback className="bg-gray-700 text-white text-xl font-bold">
                           {entry.student.name.split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>
                       )}
                     </Avatar>
                     <div>
-                      <div className={`font-bold ${idx === 0 ? 'text-purple-500 text-lg' : idx === 1 ? 'text-green-500 text-lg' : idx === 2 ? 'text-blue-500 text-lg' : 'text-white text-base'}`}>{entry.student.name}</div>
-                      <div className="text-xs text-gray-400">Level {Math.floor((entry.student.xpPoints || 0) / 1200) + 1}</div>
+                        <h3 className="text-xl font-bold">{entry.student.name}</h3>
+                        <div className="flex items-center gap-2">
+                          <Badge className={`${getRankBadge(entry.position).bgColor} ${getRankBadge(entry.position).color} border-0`}>
+                            {getRankBadge(entry.position).name}
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
+                    {getTrophyIcon(entry.position)}
                   </div>
-                  <div className="text-right">
-                    <span className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-400 px-6 py-2 rounded-full text-base font-bold">
-                      <span role="img" aria-label="gem">💎</span> {entry.xpPoints} XP
-                    </span>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-gray-400 text-sm">Lokal stats {entry.lokalStats?.wins || 0} - {entry.lokalStats?.losses || 0}</p>
+                    </div>
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-sm text-gray-400">Winrate</span>
+                        <span className="text-sm font-bold">{entry.winrate || 0}%</span>
+                      </div>
+                      <div className="w-full bg-gray-700 rounded-full h-2">
+                        <div 
+                          className="bg-green-500 h-2 rounded-full" 
+                          style={{ width: `${entry.winrate || 0}%` }}
+                        ></div>
+                      </div>
+                    </div>
+
                   </div>
-                </div>
+                </CardContent>
+              </Card>
               ))}
-            </div>
           </div>
+
+          {/* Leaderboard Table */}
+          <Card className="bg-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-white">Global Leaderboard</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-700">
+                      <th className="text-left py-3 px-4 text-gray-400 font-medium">Place</th>
+                      <th className="text-left py-3 px-4 text-gray-400 font-medium">Player name</th>
+                      <th className="text-left py-3 px-4 text-gray-400 font-medium">School</th>
+                      <th className="text-left py-3 px-4 text-gray-400 font-medium">Score</th>
+                      <th className="text-left py-3 px-4 text-gray-400 font-medium">Winrate</th>
+                      <th className="text-left py-3 px-4 text-gray-400 font-medium">Rank</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedLeaderboard.map((entry) => (
+                      <tr 
+                        key={entry.student.id} 
+                        id={currentStudent && entry.student.id === currentStudent.id ? 'current-user-row' : undefined}
+                        className={`border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors ${
+                          currentStudent && entry.student.id === currentStudent.id 
+                            ? 'bg-ceyquest-purple/10 border-ceyquest-purple/30' 
+                            : ''
+                        }`}
+                      >
+                        <td className="py-4 px-4">
+                          <span className="text-white font-bold">#{entry.position}</span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-10 w-10">
+                              {entry.student.photo ? (
+                                <AvatarImage src={entry.student.photo} alt={entry.student.name} />
+                              ) : (
+                                <AvatarFallback className="bg-gray-700 text-white">
+                                  {entry.student.name.split(' ').map(n => n[0]).join('')}
+                                </AvatarFallback>
+                              )}
+                            </Avatar>
+                            <span className="text-white font-medium">{entry.student.name}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="text-white">
+                            {entry.student.schoolName || entry.student.school || 'CeyQuest Academy'}
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <span className="text-ceyquest-purple font-bold">
+                            {entry.xpPoints.toLocaleString()} XP
+                          </span>
+                        </td>
+                        <td className="py-4 px-4">
+                          <div className="flex items-center gap-2">
+                            <span className="text-white font-medium">{entry.winrate || 0}%</span>
+                            <div className="w-16 bg-gray-700 rounded-full h-2">
+                              <div 
+                                className="bg-green-500 h-2 rounded-full" 
+                                style={{ width: `${entry.winrate || 0}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-4">
+                          <Badge className={`${getRankBadge(entry.position).bgColor} ${getRankBadge(entry.position).color} border-0`}>
+                            {getRankBadge(entry.position).name}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </Layout>

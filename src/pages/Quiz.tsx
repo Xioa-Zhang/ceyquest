@@ -75,7 +75,7 @@ const Quiz = () => {
   };
 
   const generateQuestions = (subject: string, chapter: number): Question[] => {
-    const questionTemplates: { [key: string]: any[] } = {
+    const questionTemplates: { [key: string]: QuestionTemplate[] } = {
       'Mathematics': [
         {
           question: 'What is the result of 15 + 27?',

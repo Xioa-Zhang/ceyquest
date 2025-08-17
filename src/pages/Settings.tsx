@@ -26,13 +26,38 @@ const Settings = () => {
   const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
+    // Basic Profile
+    fullName: '',
+    preferredName: '',
+    dateOfBirth: '',
+    age: '',
+    gender: '',
+    profilePicture: '',
+    
+    // Academic Details
     grade: '',
-    school: '',
-    dob: '',
+    schoolName: '',
+    subjects: [] as string[],
+    
+    // Language & Cultural Info
+    primaryLanguage: '',
+    otherLanguages: [] as string[],
+    religion: '',
+    citizenship: '',
+    country: '',
+    
+    // Learning Preferences
+    preferredStudyTime: '',
+    studyGoal: '',
+    reminders: true,
+    gamification: true,
+    
+    // Account Setup
+    email: '',
     phone: '',
-    photo: ''
+    password: '',
+    parentConsent: false,
+    termsAgreement: false
   });
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -41,7 +66,8 @@ const Settings = () => {
     soundEffects: true,
     darkMode: true,
     studyReminders: true,
-    emailUpdates: false
+    emailUpdates: false,
+    gamification: true
   });
   
   const { toast } = useToast();
@@ -52,21 +78,50 @@ const Settings = () => {
       const studentData = JSON.parse(savedStudent);
       setCurrentStudent(studentData);
       setFormData({
-        name: studentData.name || '',
-        email: studentData.email || '',
+        // Basic Profile
+        fullName: studentData.fullName || studentData.name || '',
+        preferredName: studentData.preferredName || '',
+        dateOfBirth: studentData.dateOfBirth ? new Date(studentData.dateOfBirth).toISOString().split('T')[0] : '',
+        age: studentData.age || '',
+        gender: studentData.gender || '',
+        profilePicture: studentData.profilePicture || studentData.photo || '',
+        
+        // Academic Details
         grade: studentData.grade || '',
-        school: studentData.school || '',
-        dob: studentData.dob || '',
+        schoolName: studentData.schoolName || studentData.school || '',
+        subjects: studentData.subjects || [],
+        
+        // Language & Cultural Info
+        primaryLanguage: studentData.primaryLanguage || '',
+        otherLanguages: studentData.otherLanguages || [],
+        religion: studentData.religion || '',
+        citizenship: studentData.citizenship || '',
+        country: studentData.country || '',
+        
+        // Learning Preferences
+        preferredStudyTime: studentData.preferredStudyTime || '',
+        studyGoal: studentData.studyGoal || '',
+        reminders: studentData.reminders !== undefined ? studentData.reminders : true,
+        gamification: studentData.gamification !== undefined ? studentData.gamification : true,
+        
+        // Account Setup
+        email: studentData.email || '',
         phone: studentData.phone || '',
-        photo: studentData.photo || ''
+        password: studentData.password || '',
+        parentConsent: studentData.parentConsent || false,
+        termsAgreement: studentData.termsAgreement || false
       });
-      setPhotoPreview(studentData.photo || null);
+      setPhotoPreview(studentData.profilePicture || studentData.photo || null);
     }
 
-    // Load settings from localStorage
+    // Load settings from localStorage and student data
     const savedSettings = localStorage.getItem('ceyquest-settings');
     if (savedSettings) {
-      setSettings(JSON.parse(savedSettings));
+      const parsedSettings = JSON.parse(savedSettings);
+      setSettings({
+        ...parsedSettings,
+        gamification: studentData.gamification !== undefined ? studentData.gamification : parsedSettings.gamification || true
+      });
     }
   }, []);
 
@@ -99,17 +154,17 @@ const Settings = () => {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPhotoPreview(reader.result as string);
-        setFormData((prev) => ({ ...prev, photo: reader.result as string }));
+        setFormData((prev) => ({ ...prev, profilePicture: reader.result as string }));
       };
       reader.readAsDataURL(file);
     }
   };
 
   const handleSaveProfile = () => {
-    if (!formData.name || !formData.grade) {
+    if (!formData.fullName || !formData.grade) {
       toast({
         title: "Error",
-        description: "Name and Grade are required fields.",
+        description: "Full Name and Grade are required fields.",
         variant: "destructive"
       });
       return;
@@ -118,7 +173,11 @@ const Settings = () => {
     const updatedStudent = {
       ...currentStudent,
       ...formData,
-      grade: parseInt(formData.grade)
+      grade: parseInt(formData.grade),
+      // Ensure backward compatibility
+      name: formData.fullName,
+      photo: formData.profilePicture,
+      school: formData.schoolName
     };
 
     localStorage.setItem('ceyquest-student', JSON.stringify(updatedStudent));
@@ -218,81 +277,282 @@ const Settings = () => {
                   Upload Profile Image
                 </Button>
               </div>
-              <div className="flex-1 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      disabled={!isEditing}
-                      className="mt-1"
-                    />
+              <div className="flex-1 space-y-6">
+                {/* Basic Profile Section */}
+                <div>
+                  <h3 className="font-semibold mb-4 text-lg">Basic Profile</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="fullName">Full Name *</Label>
+                      <Input
+                        id="fullName"
+                        value={formData.fullName}
+                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                        disabled={!isEditing}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="preferredName">Preferred Name</Label>
+                      <Input
+                        id="preferredName"
+                        value={formData.preferredName}
+                        onChange={(e) => setFormData({ ...formData, preferredName: e.target.value })}
+                        disabled={!isEditing}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                      <Input
+                        id="dateOfBirth"
+                        type="date"
+                        value={formData.dateOfBirth}
+                        onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                        disabled={!isEditing}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="age">Age</Label>
+                      <Input
+                        id="age"
+                        type="number"
+                        value={formData.age}
+                        onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                        disabled={!isEditing}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="gender">Gender</Label>
+                      <Select 
+                        value={formData.gender} 
+                        onValueChange={(value) => setFormData({ ...formData, gender: value })}
+                        disabled={!isEditing}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="male">Male</SelectItem>
+                          <SelectItem value="female">Female</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                          <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="grade">Grade</Label>
-                    <Select 
-                      value={formData.grade} 
-                      onValueChange={(value) => setFormData({ ...formData, grade: value })}
-                      disabled={!isEditing}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: 8 }, (_, i) => i + 6).map((grade) => (
-                          <SelectItem key={grade} value={grade.toString()}>
-                            Grade {grade}
-                          </SelectItem>
+                </div>
+
+                {/* Academic Details Section */}
+                <div>
+                  <h3 className="font-semibold mb-4 text-lg">Academic Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="grade">Grade *</Label>
+                      <Select 
+                        value={formData.grade} 
+                        onValueChange={(value) => setFormData({ ...formData, grade: value })}
+                        disabled={!isEditing}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 8 }, (_, i) => i + 6).map((grade) => (
+                            <SelectItem key={grade} value={grade.toString()}>
+                              Grade {grade}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="schoolName">School Name</Label>
+                      <Input
+                        id="schoolName"
+                        value={formData.schoolName}
+                        onChange={(e) => setFormData({ ...formData, schoolName: e.target.value })}
+                        disabled={!isEditing}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label>Selected Subjects</Label>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {formData.subjects.map((subject, index) => (
+                          <Badge key={index} variant="secondary" className="text-sm">
+                            {subject}
+                          </Badge>
                         ))}
-                      </SelectContent>
-                    </Select>
+                        {formData.subjects.length === 0 && (
+                          <span className="text-muted-foreground text-sm">No subjects selected</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      disabled={!isEditing}
-                      className="mt-1"
-                    />
+                </div>
+
+                {/* Language & Cultural Info Section */}
+                <div>
+                  <h3 className="font-semibold mb-4 text-lg">Language & Cultural Info</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="primaryLanguage">Primary Language</Label>
+                      <Select 
+                        value={formData.primaryLanguage} 
+                        onValueChange={(value) => setFormData({ ...formData, primaryLanguage: value })}
+                        disabled={!isEditing}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select primary language" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="english">English</SelectItem>
+                          <SelectItem value="sinhala">Sinhala</SelectItem>
+                          <SelectItem value="tamil">Tamil</SelectItem>
+                          <SelectItem value="arabic">Arabic</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="religion">Religion</Label>
+                      <Select 
+                        value={formData.religion} 
+                        onValueChange={(value) => setFormData({ ...formData, religion: value })}
+                        disabled={!isEditing}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select religion" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="buddhism">Buddhism</SelectItem>
+                          <SelectItem value="islam">Islam</SelectItem>
+                          <SelectItem value="christianity">Christianity</SelectItem>
+                          <SelectItem value="hinduism">Hinduism</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                          <SelectItem value="none">None</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="citizenship">Citizenship</Label>
+                      <Input
+                        id="citizenship"
+                        value={formData.citizenship}
+                        onChange={(e) => setFormData({ ...formData, citizenship: e.target.value })}
+                        disabled={!isEditing}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="country">Country</Label>
+                      <Input
+                        id="country"
+                        value={formData.country}
+                        onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                        disabled={!isEditing}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Label>Other Languages</Label>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {formData.otherLanguages.map((language, index) => (
+                          <Badge key={index} variant="outline" className="text-sm">
+                            {language}
+                          </Badge>
+                        ))}
+                        {formData.otherLanguages.length === 0 && (
+                          <span className="text-muted-foreground text-sm">No additional languages</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="school">School</Label>
-                    <Input
-                      id="school"
-                      value={formData.school}
-                      onChange={(e) => setFormData({ ...formData, school: e.target.value })}
-                      disabled={!isEditing}
-                      className="mt-1"
-                    />
+                </div>
+
+                {/* Learning Preferences Section */}
+                <div>
+                  <h3 className="font-semibold mb-4 text-lg">Learning Preferences</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="preferredStudyTime">Preferred Study Time</Label>
+                      <Select 
+                        value={formData.preferredStudyTime} 
+                        onValueChange={(value) => setFormData({ ...formData, preferredStudyTime: value })}
+                        disabled={!isEditing}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select preferred study time" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="morning">Morning (6 AM - 12 PM)</SelectItem>
+                          <SelectItem value="afternoon">Afternoon (12 PM - 6 PM)</SelectItem>
+                          <SelectItem value="evening">Evening (6 PM - 12 AM)</SelectItem>
+                          <SelectItem value="night">Night (12 AM - 6 AM)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="studyGoal">Study Goal</Label>
+                      <Select 
+                        value={formData.studyGoal} 
+                        onValueChange={(value) => setFormData({ ...formData, studyGoal: value })}
+                        disabled={!isEditing}
+                      >
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select study goal" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="improve-grades">Improve Grades</SelectItem>
+                          <SelectItem value="prepare-exams">Prepare for Exams</SelectItem>
+                          <SelectItem value="learn-new-skills">Learn New Skills</SelectItem>
+                          <SelectItem value="maintain-performance">Maintain Performance</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  {/* Date of Birth */}
-                  <div>
-                    <Label htmlFor="dob">Date of Birth</Label>
-                    <Input
-                      id="dob"
-                      type="date"
-                      value={formData.dob}
-                      onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                      disabled={!isEditing}
-                      className="mt-1"
-                    />
-                  </div>
-                  {/* Phone Number */}
-                  <div>
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      disabled={!isEditing}
-                      className="mt-1"
-                    />
+                </div>
+
+                {/* Account Setup Section */}
+                <div>
+                  <h3 className="font-semibold mb-4 text-lg">Account Information</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        disabled={!isEditing}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        disabled={!isEditing}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="password">Password</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        disabled={!isEditing}
+                        placeholder="••••••••"
+                        className="mt-1"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -301,6 +561,7 @@ const Settings = () => {
                     <Badge variant="secondary">Grade {currentStudent.grade}</Badge>
                     <Badge variant="outline">{currentStudent.xpPoints} XP</Badge>
                     <Badge variant="outline">Rank #{currentStudent.rank}</Badge>
+                    <Badge variant="outline">{formData.subjects.length} Subjects</Badge>
                   </div>
                 )}
               </div>
@@ -357,6 +618,18 @@ const Settings = () => {
                     id="email-updates"
                     checked={settings.emailUpdates}
                     onCheckedChange={(checked) => handleSettingChange('emailUpdates', checked)}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="gamification">Gamification Features</Label>
+                    <p className="text-sm text-muted-foreground">Enable points, badges, and leaderboards</p>
+                  </div>
+                  <Switch
+                    id="gamification"
+                    checked={settings.gamification}
+                    onCheckedChange={(checked) => handleSettingChange('gamification', checked)}
                   />
                 </div>
               </div>
